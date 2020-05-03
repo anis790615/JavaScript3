@@ -1,11 +1,11 @@
-const url = "https://dog.ceo/api/breeds/image/random";
+const url = 'https://dog.ceo/api/breeds/image/random';
 
 function showDog(imgSrc) {
-  let list = document.querySelector("#dogPhoto");
+  let list = document.querySelector('#dogPhoto');
 
-  // list.innerHTML = ""; //I thought that the image should be replaced
-  const li = document.createElement("li");
-  const dogImage = document.createElement("img");
+  // list.innerHTML = ""; //Initially I thought that each image should be replaced by the new one. Stasel clarified that they should be added, so I commented this out.
+  const li = document.createElement('li');
+  const dogImage = document.createElement('img');
   dogImage.src = imgSrc;
   li.appendChild(dogImage);
 
@@ -13,8 +13,8 @@ function showDog(imgSrc) {
 }
 function getData() {
   const xhr = new XMLHttpRequest();
-  xhr.responseType = "json";
-  xhr.open("GET", url);
+  xhr.responseType = 'json';
+  xhr.open('GET', url);
   xhr.onload = () => {
     if (xhr.status < 400) {
       console.log(xhr.response);
@@ -23,18 +23,18 @@ function getData() {
       console.log(`Error: ${xhr.status}`);
     }
   };
-  xhr.onerror = () => console.log("An Error Occured");
+  xhr.onerror = () => console.log('An Error Occured');
   xhr.send();
 }
 function getDataAxios() {
   axios
     .get(url)
-    .then((response) => {
+    .then(response => {
       console.log(response);
       showDog(response.data.message);
     })
-    .catch((err) => console.log(err));
+    .catch(err => console.log(err));
 }
 
-document.getElementById("clickXHR").addEventListener("click", getData);
-document.getElementById("clickAxios").addEventListener("click", getDataAxios);
+document.getElementById('clickXHR').addEventListener('click', getData);
+document.getElementById('clickAxios').addEventListener('click', getDataAxios);

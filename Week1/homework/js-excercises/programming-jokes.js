@@ -1,4 +1,6 @@
-const randomIssue = () => Math.floor(Math.random() * 2301) + 1; // Currently the latest issue on the website as of May is 2301, and the first issue is one, so a random number will be returned between them. Another option was to calculate the month difference between the current month and a reference month so the difference is added to the max number in the randomizer.
+// I assumed that fetching the same issue at all times is kind of boring, so I decided to randomize the issue fetched.
+const randomIssue = () => Math.floor(Math.random() * 2301) + 1;
+// Currently the latest issue on the website as of May is 2301, and the first issue is one, so a random number will be returned between them. Another option was to calculate the month difference between the current month and a reference month so the difference is added to the max number in the randomizer.
 const url = `https://xkcd.now.sh/?comic=`;
 function showJoke(issue) {
   const joke = `
