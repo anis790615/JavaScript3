@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Who Do We Have Here?</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: teal;
+      }
+      .card {
+        width: 400px;
+        background: white;
+        margin: 10rem auto 1rem auto;
+        display: flex;
+        justify-content: space-between;
+      }
+      .info ul {
+        list-style: none;
+        padding: 1rem;
+        font-size: 0.8rem;
+      }
+      .button-wrap {
+        display: flex;
+        justify-content: center;
+      }
+      button {
+        background: orangered;
+        color: white;
+        padding: 0.5rem 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card"></div>
+      <div class="button-wrap">
+        <button id="click">Find Random Friend</button>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="random-user.js"></script>
+  </body>
+</html>
