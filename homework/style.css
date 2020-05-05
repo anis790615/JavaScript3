@@ -1,3 +1,93 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Roboto', sans-serif;
+  height: 100vh;
+}
+
+#root {
+  max-width: 70vw;
+  margin: auto;
+  height: 100%;
+}
+.main-container {
+  width: 100%;
+  display: flex;
+}
+.repo-container,
+.contributors-container {
+  width: 50%;
+}
+.header,
+.alert-error,
+.card {
+  padding: 1rem;
+}
+.header {
+  background: #3f51b5;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+}
 .alert-error {
   color: red;
+  background: #f8d7da;
+}
+.selectMenu {
+  border: 1px solid #3f51b5;
+  outline-color: #3f51b5;
+  font: inherit;
+  margin-left: 1.5rem;
+  /* padding: 0.2rem 1rem 0.2rem 1rem; */
+  width: 10rem;
+}
+.card {
+  border-radius: 2px;
+  font-size: 1.5vmin;
+  line-height: 1.6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  margin: 0.2rem;
+}
+.card-small {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.contributorsTitle {
+  color: darkgray;
+  margin-bottom: 0;
+  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-bottom: none;
+}
+.userName {
+  text-decoration: none;
+  font-size: 1.2rem;
+  margin-left: 1rem;
+}
+.badge {
+  margin-left: auto;
+  background: darkgrey;
+  color: white;
+  padding: 0.1rem 0.8rem;
+  border-radius: 5px;
+}
+tr > :first-child {
+  font-weight: bold;
+  vertical-align: top;
+}
+tr > :nth-child(2) {
+  padding-left: 1rem;
+}
+
+@media (max-width: 768px) {
+  #root {
+    max-width: 100vw;
+  }
+  .card {
+    font-size: 1.5vmax;
+  }
 }
