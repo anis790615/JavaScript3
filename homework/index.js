@@ -75,25 +75,6 @@
       text: contributor.contributions,
     });
   }
-  // function displayRepoAndContributors(contributors, repo) {
-  //   const mainContainer = createAndAppend('main', root, {
-  //     class: 'main-container',
-  //   });
-  //   const contributorsContainer = createAndAppend('section', mainContainer, {
-  //     class: 'contributors-container',
-  //   });
-  //   const reposContainer = createAndAppend('section', mainContainer, {
-  //     class: 'repo-container',
-  //   });
-  //   showRepo(repo, reposContainer);
-  //   createAndAppend('p', contributorsContainer, {
-  //     text: 'Contributors',
-  //     class: 'card contributorsTitle',
-  //   });
-  //   // contributors.forEach(contributor =>
-  //   //   showContributor(contributor, contributorsContainer),
-  //   // );
-  // }
   function main(url) {
     // Selecting and creating main elements on page
     const root = document.getElementById('root');
@@ -119,9 +100,12 @@
         .sort((a, b) => a.name.localeCompare(b.name))
         .forEach((repo, index) => createMenu(repo, index, selectionMenu));
       // showing the first repo by default
-      // showRepo(repos[0], reposContainer);
       fetchJSON(repos[0].contributors_url, contributors => {
         showRepo(repos[0], reposContainer);
+        createAndAppend('p', contributorsContainer, {
+          text: 'Contributors',
+          class: 'card contributorsTitle',
+        });
         contributors.forEach(contributor =>
           showContributor(contributor, contributorsContainer),
         );
