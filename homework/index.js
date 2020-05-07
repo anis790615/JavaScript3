@@ -1,19 +1,6 @@
 'use strict';
 
 {
-  function fetchJSON(url, cb) {
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        cb(data);
-      })
-      .catch(err =>
-        createAndAppend('div', root, {
-          text: err,
-          class: 'alert-error',
-        }),
-      );
-  }
   function createAndAppend(name, parent, options = {}) {
     const elem = document.createElement(name);
     parent.appendChild(elem);
@@ -25,6 +12,9 @@
       }
     });
     return elem;
+  }
+  function fetchJSON(url) {
+    return fetch(url).then(response => response.json());
   }
 
   function createMenu(repo, index, selectionMenu) {
@@ -55,6 +45,7 @@
         <td>${repo.updated_at.replace(/[ tz]/gi, ' ')}</td>
       </tr>
         `;
+    return fetchJSON(repo.contributors_url);
   }
   function showContributor(contributor, contributorsContainer) {
     const contributorCard = createAndAppend('div', contributorsContainer, {
@@ -75,6 +66,22 @@
       text: contributor.contributions,
     });
   }
+  function sortRepos(repos, selectionMenu) {
+    repos
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach((repo, index) => createMenu(repo, index, selectionMenu));
+    return repos[0];
+  }
+  function displayContributors(contributors, contributorsContainer) {
+    createAndAppend('p', contributorsContainer, {
+      text: 'Contributors',
+      class: 'card contributorsTitle',
+    });
+    contributors.forEach(contributor =>
+      showContributor(contributor, contributorsContainer),
+    );
+  }
+
   function main(url) {
     // Selecting and creating main elements on page
     const root = document.getElementById('root');
@@ -95,38 +102,27 @@
       class: 'contributors-container',
     });
 
-    fetchJSON(url, repos => {
-      repos
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .forEach((repo, index) => createMenu(repo, index, selectionMenu));
-      // showing the first repo by default
-      fetchJSON(repos[0].contributors_url, contributors => {
-        showRepo(repos[0], reposContainer);
-        createAndAppend('p', contributorsContainer, {
-          text: 'Contributors',
-          class: 'card contributorsTitle',
-        });
-        contributors.forEach(contributor =>
-          showContributor(contributor, contributorsContainer),
+    fetchJSON(url)
+      .then(repos => sortRepos(repos, selectionMenu))
+      .then(firstRepo => showRepo(firstRepo, reposContainer))
+      .then(listOfContributors =>
+        displayContributors(listOfContributors, contributorsContainer),
+      )
+      .catch(err =>
+        createAndAppend('div', root, {
+          text: err,
+          class: 'alert-error',
+        }),
+      );
+    selectionMenu.addEventListener('change', e => {
+      const index = e.target.value;
+      reposContainer.innerHTML = '';
+      contributorsContainer.innerHTML = '';
+      fetchJSON(url)
+        .then(repos => showRepo(repos[index], reposContainer))
+        .then(listOfContributors =>
+          displayContributors(listOfContributors, contributorsContainer),
         );
-      });
-
-      // Adding an event listener for changes in the selector
-      selectionMenu.addEventListener('change', e => {
-        const index = e.target.value;
-        reposContainer.innerHTML = '';
-        contributorsContainer.innerHTML = '';
-        fetchJSON(repos[index].contributors_url, contributors => {
-          showRepo(repos[index], reposContainer);
-          createAndAppend('p', contributorsContainer, {
-            text: 'Contributors',
-            class: 'card contributorsTitle',
-          });
-          contributors.forEach(contributor =>
-            showContributor(contributor, contributorsContainer),
-          );
-        });
-      });
     });
   }
 
