@@ -70,7 +70,7 @@
     repos
       .sort((a, b) => a.name.localeCompare(b.name))
       .forEach((repo, index) => createMenu(repo, index, selectionMenu));
-    return repos[0];
+    return repos;
   }
   function displayContributors(contributors, contributorsContainer) {
     createAndAppend('p', contributorsContainer, {
@@ -101,10 +101,11 @@
     const contributorsContainer = createAndAppend('section', mainContainer, {
       class: 'contributors-container',
     });
-
-    fetchJSON(url)
-      .then(repos => sortRepos(repos, selectionMenu))
-      .then(firstRepo => showRepo(firstRepo, reposContainer))
+    const sortedRepos = fetchJSON(url).then(repos =>
+      sortRepos(repos, selectionMenu),
+    );
+    sortedRepos
+      .then(repos => showRepo(repos[0], reposContainer))
       .then(listOfContributors =>
         displayContributors(listOfContributors, contributorsContainer),
       )
@@ -118,7 +119,7 @@
       const index = e.target.value;
       reposContainer.innerHTML = '';
       contributorsContainer.innerHTML = '';
-      fetchJSON(url)
+      sortedRepos
         .then(repos => showRepo(repos[index], reposContainer))
         .then(listOfContributors =>
           displayContributors(listOfContributors, contributorsContainer),
