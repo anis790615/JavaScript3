@@ -1,6 +1,7 @@
 'use strict';
 
 {
+  // A global variable for a template that will be used to create the card with the information from the repo.
   const HYFInfoTemplate = [
     { title: 'Repository', desc: 'name', link: 'html_url', target: '_blank' },
     { title: 'Description', desc: 'description' },
@@ -28,14 +29,12 @@
   }
   // A function that contain the fetch function, and which return response.json.
   function fetchJSON(url) {
-    return fetch(url).then(response => response.json());
-  }
-  // A function that sorts the fetched repositories alphabetically. I could've joined this function with the fetch function, but chose to separate them for clarity and readability.
-  function sortRepos(repos, selectionMenu) {
-    repos
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .forEach((repo, index) => createMenu(repo, index, selectionMenu));
-    return repos;
+    return fetch(url).then(response => {
+      if (response.status >= 200 && response.status < 400) {
+        return response.json();
+      }
+      throw new Error(`HTTP ERROR`);
+    });
   }
   // Creating the selection menu
   function createMenu(repo, index, selectionMenu) {
@@ -44,41 +43,31 @@
       value: index,
     });
   }
-  // the function that displays the selected repository on the page. innerHTML was selected due te the fact that with the chosen format looping and creating each element would not have saved much code. At the end the function return a new fetch promise with the the url of a contributors, which is used by the next function.
+  // A function that sorts the fetched repositories alphabetically. I could've joined this function with the fetch function, but chose to separate them for clarity and readability.
+  function sortRepos(repos, selectionMenu) {
+    repos
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach((repo, index) => createMenu(repo, index, selectionMenu));
+    return repos;
+  }
+  // the function that displays the selected repository on the page. innerHTML was selected due te the fact that with the chosen format looping and creating each element would not have saved much code. Based on the review of last homework project, was replace with a callback, with a function that creates the card based on template. At the end the function return a new fetch promise with the the url of a contributors, which is used by the next function.
   function showRepo(repo, parent, cb) {
     const card = createAndAppend('div', parent, { class: 'card' });
     cb(repo, card, HYFInfoTemplate);
-    // const infoTable = createAndAppend('table', card);
-    // infoTable.innerHTML = `
-    //   <tr>
-    //     <td>Repository: </td>
-    //     <td><a href=${repo.html_url} target="_blank">${repo.name}</a>
-    //     </td>
-    //   </tr>
-    //   <tr>
-    //     <td>Description: </td>
-    //     <td>${repo.description}</td>
-    //   </tr>
-    //   <tr>
-    //     <td>Forks: </td>
-    //     <td>${repo.forks_count}</td>
-    //   </tr>
-    //   <tr>
-    //     <td>Updated: </td>
-    //     <td>${repo.updated_at.replace(/[ tz]/gi, ' ')}</td>
-    //   </tr>
-    //     `;
     return fetchJSON(repo.contributors_url);
   }
 
   function createTable(repository, parent, referenceTemplate) {
     const infoTable = createAndAppend('table', parent);
     referenceTemplate.forEach(item => {
-      console.log(item);
       const row = createAndAppend('tr', infoTable);
-      createAndAppend('td', row, { text: item.title + ':' });
-
-      if (!item.hasOwnProperty('link')) {
+      createAndAppend('td', row, { text: `${item.title}:` });
+      if (item.title === 'Updated') {
+        createAndAppend('td', row, {
+          text: repository[item.desc].replace(/[ tz]/gi, ' '),
+        });
+        // eslint-disable-next-line no-prototype-builtins
+      } else if (!item.hasOwnProperty('link')) {
         createAndAppend('td', row, {
           text: repository[item.desc],
         });
@@ -123,7 +112,7 @@
   }
 
   function main(url) {
-    // Selecting and creating main elements on page
+    // Selecting and creating main elements on page and assigning variables
     const root = document.getElementById('root');
     const headerContainer = createAndAppend('header', root, {
       class: 'header',
