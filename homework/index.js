@@ -1,6 +1,18 @@
 'use strict';
 
 {
+  const HYFInfoTemplate = [
+    { title: 'Repository', desc: 'name', link: 'html_url', target: '_blank' },
+    { title: 'Description', desc: 'description' },
+    {
+      title: 'Forks',
+      desc: 'forks_count',
+    },
+    {
+      title: 'Updated',
+      desc: 'updated_at',
+    },
+  ];
   // The function was supplied by the project and used to create elements. No changes wer made to the function
   function createAndAppend(name, parent, options = {}) {
     const elem = document.createElement(name);
@@ -33,29 +45,51 @@
     });
   }
   // the function that displays the selected repository on the page. innerHTML was selected due te the fact that with the chosen format looping and creating each element would not have saved much code. At the end the function return a new fetch promise with the the url of a contributors, which is used by the next function.
-  function showRepo(repo, theParent) {
-    const card = createAndAppend('div', theParent, { class: 'card' });
-    const infoTable = createAndAppend('table', card);
-    infoTable.innerHTML = `
-      <tr>
-        <td>Repository: </td>
-        <td><a href=${repo.html_url} target="_blank">${repo.name}</a>
-        </td>
-      </tr>
-      <tr>
-        <td>Description: </td>
-        <td>${repo.description}</td>
-      </tr>
-      <tr>
-        <td>Forks: </td>
-        <td>${repo.forks_count}</td>
-      </tr>
-      <tr>
-        <td>Updated: </td>
-        <td>${repo.updated_at.replace(/[ tz]/gi, ' ')}</td>
-      </tr>
-        `;
+  function showRepo(repo, parent, cb) {
+    const card = createAndAppend('div', parent, { class: 'card' });
+    cb(repo, card, HYFInfoTemplate);
+    // const infoTable = createAndAppend('table', card);
+    // infoTable.innerHTML = `
+    //   <tr>
+    //     <td>Repository: </td>
+    //     <td><a href=${repo.html_url} target="_blank">${repo.name}</a>
+    //     </td>
+    //   </tr>
+    //   <tr>
+    //     <td>Description: </td>
+    //     <td>${repo.description}</td>
+    //   </tr>
+    //   <tr>
+    //     <td>Forks: </td>
+    //     <td>${repo.forks_count}</td>
+    //   </tr>
+    //   <tr>
+    //     <td>Updated: </td>
+    //     <td>${repo.updated_at.replace(/[ tz]/gi, ' ')}</td>
+    //   </tr>
+    //     `;
     return fetchJSON(repo.contributors_url);
+  }
+
+  function createTable(repository, parent, referenceTemplate) {
+    const infoTable = createAndAppend('table', parent);
+    referenceTemplate.forEach(item => {
+      console.log(item);
+      const row = createAndAppend('tr', infoTable);
+      createAndAppend('td', row, { text: item.title + ':' });
+
+      if (!item.hasOwnProperty('link')) {
+        createAndAppend('td', row, {
+          text: repository[item.desc],
+        });
+      } else {
+        createAndAppend('a', row, {
+          text: repository[item.desc],
+          href: repository[item.link],
+          target: item.target,
+        });
+      }
+    });
   }
   // A function that creates  the contributor card on the page.
   function showContributor(contributor, contributorsContainer) {
@@ -107,13 +141,14 @@
     const contributorsContainer = createAndAppend('section', mainContainer, {
       class: 'contributors-container',
     });
+
     // Creating a variable with sorted repos to be used after running the code and after a change in the menu
     const sortedRepos = fetchJSON(url).then(repos =>
       sortRepos(repos, selectionMenu),
     );
     // Showing the first repo and its contributors by default
     sortedRepos
-      .then(repos => showRepo(repos[0], reposContainer))
+      .then(repos => showRepo(repos[0], reposContainer, createTable))
       .then(listOfContributors =>
         displayContributors(listOfContributors, contributorsContainer),
       )
@@ -129,7 +164,7 @@
       reposContainer.innerHTML = '';
       contributorsContainer.innerHTML = '';
       sortedRepos
-        .then(repos => showRepo(repos[index], reposContainer))
+        .then(repos => showRepo(repos[index], reposContainer, createTable))
         .then(listOfContributors =>
           displayContributors(listOfContributors, contributorsContainer),
         );
