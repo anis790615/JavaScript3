@@ -25,7 +25,7 @@
     render(repos) {
       createAndAppend('div', this.header, { text: this.account.name });
       this.select = createAndAppend('select', this.header, {
-        class: 'repo-select',
+        class: 'selectMenu',
         autofocus: 'autofocus',
       });
 
