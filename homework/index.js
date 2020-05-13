@@ -28,13 +28,9 @@
     return elem;
   }
   // A function that contain the fetch function, and which return response.json.
-  function fetchJSON(url) {
-    return fetch(url).then(response => {
-      if (response.status >= 200 && response.status < 400) {
-        return response.json();
-      }
-      throw new Error(`HTTP ERROR`);
-    });
+  async function getDataAxios(url) {
+    const response = await axios.get(url);
+    return response.data;
   }
   // Creating the selection menu
   function createMenu(repo, index, selectionMenu) {
@@ -50,13 +46,7 @@
       .forEach((repo, index) => createMenu(repo, index, selectionMenu));
     return repos;
   }
-  // the function that displays the selected repository on the page. innerHTML was selected due te the fact that with the chosen format looping and creating each element would not have saved much code. Based on the review of last homework project, was replace with a callback, with a function that creates the card based on template. At the end the function return a new fetch promise with the the url of a contributors, which is used by the next function.
-  function showRepo(repo, parent, cb) {
-    const card = createAndAppend('div', parent, { class: 'card' });
-    cb(repo, card, HYFInfoTemplate);
-    return fetchJSON(repo.contributors_url);
-  }
-
+  // Creates a table based on a template indicating the elements that will be shown from the repo.
   function createTable(repository, parent, referenceTemplate) {
     const infoTable = createAndAppend('table', parent);
     referenceTemplate.forEach(item => {
@@ -79,6 +69,11 @@
         });
       }
     });
+  }
+  // Shows the selected repository. In previous homework the create table was acallback, which I changed due to that I think it belongs to the showRepo function
+  function showRepo(repo, parent) {
+    const card = createAndAppend('div', parent, { class: 'card' });
+    createTable(repo, card, HYFInfoTemplate);
   }
   // A function that creates  the contributor card on the page.
   function showContributor(contributor, contributorsContainer) {
@@ -111,7 +106,7 @@
     );
   }
 
-  function main(url) {
+  async function main(url) {
     // Selecting and creating main elements on page and assigning variables
     const root = document.getElementById('root');
     const headerContainer = createAndAppend('header', root, {
@@ -127,37 +122,37 @@
     const reposContainer = createAndAppend('section', mainContainer, {
       class: 'repo-container',
     });
+
     const contributorsContainer = createAndAppend('section', mainContainer, {
       class: 'contributors-container',
     });
-
-    // Creating a variable with sorted repos to be used after running the code and after a change in the menu
-    const sortedRepos = fetchJSON(url).then(repos =>
-      sortRepos(repos, selectionMenu),
-    );
-    // Showing the first repo and its contributors by default
-    sortedRepos
-      .then(repos => showRepo(repos[0], reposContainer, createTable))
-      .then(listOfContributors =>
-        displayContributors(listOfContributors, contributorsContainer),
-      )
-      .catch(err =>
-        createAndAppend('div', root, {
-          text: err,
-          class: 'alert-error',
-        }),
+    try {
+      const sortedRepos = await getDataAxios(url).then(repos =>
+        sortRepos(repos, selectionMenu),
       );
-    // Adding an event listener for change on the select menu and updating the view
-    selectionMenu.addEventListener('change', e => {
-      const index = e.target.value;
-      reposContainer.innerHTML = '';
-      contributorsContainer.innerHTML = '';
-      sortedRepos
-        .then(repos => showRepo(repos[index], reposContainer, createTable))
-        .then(listOfContributors =>
-          displayContributors(listOfContributors, contributorsContainer),
+      let selectedRepo = sortedRepos[0];
+      let selectedListOfContributors = await getDataAxios(
+        selectedRepo.contributors_url,
+      );
+      showRepo(selectedRepo, reposContainer);
+      displayContributors(selectedListOfContributors, contributorsContainer);
+      selectionMenu.addEventListener('change', async e => {
+        const index = e.target.value;
+        selectedRepo = sortedRepos[index];
+        selectedListOfContributors = await getDataAxios(
+          selectedRepo.contributors_url,
         );
-    });
+        reposContainer.innerHTML = '';
+        contributorsContainer.innerHTML = '';
+        showRepo(selectedRepo, reposContainer);
+        displayContributors(selectedListOfContributors, contributorsContainer);
+      });
+    } catch (error) {
+      createAndAppend('div', root, {
+        text: error,
+        class: 'alert-error',
+      });
+    }
   }
 
   const HYF_REPOS_URL =
