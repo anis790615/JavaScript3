@@ -135,6 +135,7 @@
         selectedRepo.contributors_url,
       );
       showRepo(selectedRepo, reposContainer);
+      // Putting an event listener on change
       displayContributors(selectedListOfContributors, contributorsContainer);
       selectionMenu.addEventListener('change', async e => {
         const index = e.target.value;
