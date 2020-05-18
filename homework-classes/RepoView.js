@@ -54,7 +54,8 @@
             text: repo[item.desc],
           });
         } else {
-          createAndAppend('a', row, {
+          const rowCell = createAndAppend('td', row);
+          createAndAppend('a', rowCell, {
             text: repo[item.desc],
             href: repo[item.link],
             target: item.target,

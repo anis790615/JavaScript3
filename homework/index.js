@@ -1,19 +1,6 @@
 'use strict';
 
 {
-  // A global variable for a template that will be used to create the card with the information from the repo.
-  const HYFInfoTemplate = [
-    { title: 'Repository', desc: 'name', link: 'html_url', target: '_blank' },
-    { title: 'Description', desc: 'description' },
-    {
-      title: 'Forks',
-      desc: 'forks_count',
-    },
-    {
-      title: 'Updated',
-      desc: 'updated_at',
-    },
-  ];
   // The function was supplied by the project and used to create elements. No changes wer made to the function
   function createAndAppend(name, parent, options = {}) {
     const elem = document.createElement(name);
@@ -27,7 +14,7 @@
     });
     return elem;
   }
-  // A function that contain the fetch function, and which return response.json.
+  // A function that contain the axios fetch function, and which return response.json.
   async function getDataAxios(url) {
     const response = await axios.get(url);
     return response.data;
@@ -56,13 +43,13 @@
         createAndAppend('td', row, {
           text: repository[item.desc].replace(/[ tz]/gi, ' '),
         });
-        // eslint-disable-next-line no-prototype-builtins
       } else if (!item.hasOwnProperty('link')) {
         createAndAppend('td', row, {
           text: repository[item.desc],
         });
       } else {
-        createAndAppend('a', row, {
+        const rowCell = createAndAppend('td', row);
+        createAndAppend('a', rowCell, {
           text: repository[item.desc],
           href: repository[item.link],
           target: item.target,
@@ -70,9 +57,30 @@
       }
     });
   }
-  // Shows the selected repository. In previous homework the create table was acallback, which I changed due to that I think it belongs to the showRepo function
+  // Shows the selected repository. In previous homework the create table was a callback, which I changed due to that I think it belongs to the showRepo function
   function showRepo(repo, parent) {
     const card = createAndAppend('div', parent, { class: 'card' });
+    // A variable for the template that will be used to create the card with the information from the repo. The idea is so that the template can be changed based on what information from the repo is needed to be shown in the card.
+    const HYFInfoTemplate = [
+      {
+        title: 'Repository',
+        desc: 'name',
+        link: 'html_url',
+        target: '_blank',
+      },
+      {
+        title: 'Description',
+        desc: 'description',
+      },
+      {
+        title: 'Forks',
+        desc: 'forks_count',
+      },
+      {
+        title: 'Updated',
+        desc: 'updated_at',
+      },
+    ];
     createTable(repo, card, HYFInfoTemplate);
   }
   // A function that creates  the contributor card on the page.
@@ -109,31 +117,25 @@
   async function main(url) {
     // Selecting and creating main elements on page and assigning variables
     const root = document.getElementById('root');
-    const headerContainer = createAndAppend('header', root, {
-      class: 'header',
-    });
-    createAndAppend('p', headerContainer, { text: 'HYF Repositories' });
+    const headerContainer = document.querySelector('header');
     const selectionMenu = createAndAppend('select', headerContainer, {
       class: 'selectMenu',
     });
-    const mainContainer = createAndAppend('main', root, {
-      class: 'main-container',
-    });
-    const reposContainer = createAndAppend('section', mainContainer, {
-      class: 'repo-container',
-    });
-
-    const contributorsContainer = createAndAppend('section', mainContainer, {
-      class: 'contributors-container',
-    });
+    const reposContainer = document.querySelector('.repo-container');
+    const contributorsContainer = document.querySelector(
+      '.contributors-container',
+    );
     try {
+      // A promise was used so to not create another variable to store repos.
       const sortedRepos = await getDataAxios(url).then(repos =>
         sortRepos(repos, selectionMenu),
       );
+      // Default repo shown
       let selectedRepo = sortedRepos[0];
       let selectedListOfContributors = await getDataAxios(
         selectedRepo.contributors_url,
       );
+      // Showing the repo on screen
       showRepo(selectedRepo, reposContainer);
       // Putting an event listener on change
       displayContributors(selectedListOfContributors, contributorsContainer);
